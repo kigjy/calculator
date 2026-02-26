@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #333333; /* 恢复原始深灰色背景 */
+        }
+        .calculator {
+            background: #262626; /* 恢复原始计算器机身色 */
+            padding: 20px;
+            border-radius: 15px;
+            width: fit-content; /* 核心：解决右侧空白，宽度自适应内容 */
+        }
+        #display {
+            width: 100%;
+            height: 70px;
+            background: #ffffff;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            text-align: right;
+            font-size: 28px;
+            padding: 10px;
+            border: none;
+            outline: none;
+            color: #333;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 60px); /* 恢复原始按钮尺寸 */
+            gap: 10px; /* 恢复原始间距 */
+        }
+        /* 数字/小数点按钮：淡橙色，恢复原始基调+优化质感 */
+        button {
+            height: 60px;
+            font-size: 22px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #ffd199;
+            color: #333;
+            font-weight: bold;
+            transition: all 0.2s ease; /* 保留丝滑过渡动画 */
+        }
+        /* 运算符号/清除/等号：橙色，恢复原始配色 */
+        button.operator, button.clear, button.equal {
+            background: #ff9500;
+            color: white;
+        }
+        button.equal {
+            grid-column: span 2;
+        }
+        /* 保留优化的hover+点击效果，比原始更友好 */
+        button:hover {
+            opacity: 0.85;
+            transform: scale(1.02);
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+<div class="calculator">
+    <input type="text" id="display" readonly>
+    <div class="buttons">
+        <button class="clear" onclick="clearDisplay()">C</button>
+        <button class="operator" onclick="appendToDisplay('%')">%</button>
+        <button class="operator" onclick="calcSqrt()">√</button>
+        <button class="operator" onclick="appendToDisplay('-')">-</button>
+        
+        <button onclick="appendToDisplay('7')">7</button>
+        <button onclick="appendToDisplay('8')">8</button>
+        <button onclick="appendToDisplay('9')">9</button>
+        <button class="operator" onclick="appendToDisplay('+')">+</button>
+        
+        <button onclick="appendToDisplay('4')">4</button>
+        <button onclick="appendToDisplay('5')">5</button>
+        <button onclick="appendToDisplay('6')">6</button>
+        <button class="operator" onclick="appendToDisplay('×')">×</button>
+        
+        <button onclick="appendToDisplay('1')">1</button>
+        <button onclick="appendToDisplay('2')">2</button>
+        <button onclick="appendToDisplay('3')">3</button>
+        <button class="operator" onclick="appendToDisplay('/')">÷</button>
+        
+        <button onclick="appendToDisplay('0')">0</button>
+        <button onclick="appendToDisplay('.')">.</button>   
+        <button class="equal" onclick="calculate()">=</button>
+    </div>
+</div>
+<script>
+    const display = document.getElementById('display');
+    // 追加内容到显示区（保留防连续运算符输入的优化）
+    function appendToDisplay(value) {
+        const lastChar = display.value.slice(-1);
+        if (['+', '-', '×', '/', '%'].includes(lastChar) && ['+', '×', '/', '%'].includes(value)) {
+            return;
+        }
+        display.value += value;
+    }
+    // 清空显示区
+    function clearDisplay() {
+        display.value = '';
+    }
+    // 平方根计算（修复的核心bug，保留）
+    function calcSqrt() {
+        try {
+            const num = parseFloat(display.value);
+            if (isNaN(num) || num < 0) {
+                display.value = '无效数值';
+                return;
+            }
+            display.value = Math.sqrt(num).toFixed(6).replace(/\.0+$|(\.\d*[1-9])0+$/, '$1');
+        } catch (error) {
+            display.value = '错误';
+        }
+    }
+    // 核心计算逻辑（修复%/√/冗余小数/错误提示，保留）
+    function calculate() {
+        try {
+            let expression = display.value
+                .replace('×', '*')
+                .replace('%', '/100');
+            let result = eval(expression);
+            result = Number.isFinite(result) ? result : '错误';
+            display.value = result.toFixed(6).replace(/\.0+$|(\.\d*[1-9])0+$/, '$1');
+        } catch (error) {
+            display.value = '输入错误';
+        }
+    }
+</script>
+</body>
+</html>
